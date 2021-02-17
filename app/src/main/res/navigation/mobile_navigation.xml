@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_strongboxes">
+
+    <fragment
+        android:id="@+id/navigation_strongboxes"
+        android:name="es.uc3m.strongkey.ui.strongboxes.StrongboxesFragment"
+        android:label="@string/title_strongboxes"
+        tools:layout="@layout/fragment_strongboxes" />
+
+    <fragment
+        android:id="@+id/navigation_wallet"
+        android:name="es.uc3m.strongkey.ui.wallet.WalletFragment"
+        android:label="@string/title_wallet"
+        tools:layout="@layout/fragment_wallet" />
+
+    <fragment
+        android:id="@+id/navigation_settings"
+        android:name="es.uc3m.strongkey.ui.settings.SettingsFragment"
+        android:label="@string/title_settings"
+        tools:layout="@layout/fragment_settings" />
+</navigation>
