@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import es.uc3m.strongkey.GlobalStatus
 import es.uc3m.strongkey.MainActivity
 import es.uc3m.strongkey.R
+import es.uc3m.strongkey.iniciado
 import es.uc3m.strongkey.ui.SharedPreference
 
 class StrongboxesFragment : Fragment() {
@@ -23,7 +24,7 @@ class StrongboxesFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        val mainActivity: MainActivity = activity as MainActivity
+        val mainActivity: iniciado = activity as iniciado
         globalStatus = mainActivity.globalStatus
         strongboxesViewModel =
                 ViewModelProvider(this).get(StrongboxesViewModel::class.java)
