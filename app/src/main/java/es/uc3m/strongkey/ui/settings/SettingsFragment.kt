@@ -14,17 +14,19 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import es.uc3m.strongkey.GlobalStatus
-import es.uc3m.strongkey.R
+import es.uc3m.strongkey.*
 import es.uc3m.strongkey.databinding.FragmentSettingsBinding
-import es.uc3m.strongkey.iniciado
 import es.uc3m.strongkey.ui.SharedPreference
+import okhttp3.OkHttpClient
+import okhttp3.ResponseBody
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.bouncycastle.util.encoders.Base64
-import java.io.FileInputStream
-import java.io.InputStreamReader
-import java.io.Reader
-import java.io.UnsupportedEncodingException
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.*
 import java.nio.charset.StandardCharsets
 import java.security.InvalidKeyException
 import java.security.MessageDigest
@@ -32,8 +34,6 @@ import java.security.NoSuchAlgorithmException
 import java.security.Security
 import javax.crypto.*
 import javax.crypto.spec.SecretKeySpec
-
-
 
 
 class SettingsFragment : Fragment() {
@@ -108,27 +108,28 @@ class SettingsFragment : Fragment() {
             }
 
             val editAlert = AlertDialog.Builder(requireContext()).create();
-            val editView = layoutInflater.inflate(R.layout.edit_text_layout,null);
+            val editView = layoutInflater.inflate(R.layout.edit_text_layout, null);
             editAlert.setView(editView)
-            editAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK",{
-                _,_->
+            editAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", { _, _ ->
                 val text = editAlert.findViewById<EditText>(R.id.alert_dialog_edit_text).text
-                Toast.makeText(requireContext(), "Tu texto es:\n$text",Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Tu texto es:\n$text", Toast.LENGTH_LONG).show()
                 var clave: String = text.toString()
-                if(text.toString().length<32){
+                if (text.toString().length < 32) {
                     println("HOLA")
-                    var restantes : Int =  32- text.toString().length ;
-                    var contador : Int=0;
-                    while(contador<restantes){
-                        clave+="0"
+                    var restantes: Int = 32 - text.toString().length;
+                    var contador: Int = 0;
+                    while (contador < restantes) {
+                        clave += "0"
                         contador++
                     }
 
                 }
                 println(encrypt(out.toString(), clave))
-                println(hashString("SHA-1",clave))
+                //println(hashString("SHA-1",clave))
+
+                llamar(hashString("SHA-1", clave).take(5))
             })
-            editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",{_,_->
+            editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", { _, _ ->
                 Toast.makeText(requireContext(), "NOPE", Toast.LENGTH_SHORT).show()
             })
 
@@ -156,19 +157,29 @@ class SettingsFragment : Fragment() {
     }
 
 
-    /*fun ContentResolver.getFileName(fileUri: Uri): String {
+    fun llamar(hash: String){
+        val client = OkHttpClient.Builder().build()
 
-        var name = ""
-        val returnCursor = this.query(fileUri, null, null, null, null)
-        if (returnCursor != null) {
-            val nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            returnCursor.moveToFirst()
-            name = returnCursor.getString(nameIndex)
-            returnCursor.close()
-        }
+        val retrofit = Retrofit.Builder()
+                .baseUrl("https://api.pwnedpasswords.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build()
+        val service =  retrofit.create(Interfaz::class.java)
+        val result: Call<ResponseBody> = service.getPWND(hash)
 
-        return name
-    }*/
+        result.enqueue(object : Callback<ResponseBody?> {
+            override fun onResponse(call: Call<ResponseBody?>, response: Response<ResponseBody?>) {
+                println(response.body()?.string())
+            }
+
+            override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
+                println("ERROR")
+            }
+        })
+
+
+    }
 
     fun encrypt(strToEncrypt: String, secret_key: String): String? {
         Security.addProvider(BouncyCastleProvider())
