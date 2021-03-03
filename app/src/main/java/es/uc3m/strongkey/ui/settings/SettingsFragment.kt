@@ -1,20 +1,21 @@
 package es.uc3m.strongkey.ui.settings
 
-import android.content.ContentResolver
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import es.uc3m.strongkey.GlobalStatus
-import es.uc3m.strongkey.MainActivity
+import es.uc3m.strongkey.R
 import es.uc3m.strongkey.databinding.FragmentSettingsBinding
 import es.uc3m.strongkey.iniciado
 import es.uc3m.strongkey.ui.SharedPreference
@@ -37,6 +38,7 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var settingsViewModel: SettingsViewModel
     lateinit var globalStatus: GlobalStatus
+    var clave: String = ""
 
 
 
@@ -101,11 +103,54 @@ class SettingsFragment : Fragment() {
                 }
                 //PARA LEER EL CONTENIDO
             }
-            println(encrypt(out.toString(), "662ede816988e58fb6d057d9d85605e0"))
+
+            val editAlert = AlertDialog.Builder(requireContext()).create();
+            val editView = layoutInflater.inflate(R.layout.edit_text_layout,null);
+            editAlert.setView(editView)
+            editAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK",{
+                _,_->
+                val text = editAlert.findViewById<EditText>(R.id.alert_dialog_edit_text).text
+                Toast.makeText(requireContext(), "Tu texto es:\n$text",Toast.LENGTH_LONG).show()
+                var clave: String = text.toString()
+                if(text.toString().length<32){
+                    println("HOLA")
+                    var restantes : Int =  32- text.toString().length ;
+                    var contador : Int=0;
+                    while(contador<restantes){
+                        clave+="0"
+                        contador++
+                    }
+
+                }
+                println(encrypt(out.toString(), clave))
+            })
+            editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",{_,_->
+                Toast.makeText(requireContext(), "NOPE", Toast.LENGTH_SHORT).show()
+            })
+
+            editAlert.show()
+
+
+            println(clave)
+
+            //println(encrypt(out.toString(), clave))
 
             Toast.makeText(requireContext(), filePath.toString(), Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun showAddItemDialog(c: Context) {
+        val taskEditText = EditText(c)
+        val dialog: AlertDialog = AlertDialog.Builder(c)
+                .setTitle("Add a new task")
+                .setMessage("What do you want to do next?")
+                .setView(taskEditText)
+                .setPositiveButton("Add", DialogInterface.OnClickListener { dialog, which -> clave = taskEditText.text.toString() })
+                .setNegativeButton("Cancel", null)
+                .create()
+        dialog.show()
+    }
+
 
     /*fun ContentResolver.getFileName(fileUri: Uri): String {
 
