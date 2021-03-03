@@ -27,10 +27,13 @@ import java.io.Reader
 import java.io.UnsupportedEncodingException
 import java.nio.charset.StandardCharsets
 import java.security.InvalidKeyException
+import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.Security
 import javax.crypto.*
 import javax.crypto.spec.SecretKeySpec
+
+
 
 
 class SettingsFragment : Fragment() {
@@ -123,6 +126,7 @@ class SettingsFragment : Fragment() {
 
                 }
                 println(encrypt(out.toString(), clave))
+                println(hashString("SHA-1",clave))
             })
             editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",{_,_->
                 Toast.makeText(requireContext(), "NOPE", Toast.LENGTH_SHORT).show()
@@ -131,7 +135,7 @@ class SettingsFragment : Fragment() {
             editAlert.show()
 
 
-            println(clave)
+
 
             //println(encrypt(out.toString(), clave))
 
@@ -247,5 +251,20 @@ class SettingsFragment : Fragment() {
         return null
     }
 
+    private fun hashString(type: String, input: String): String {
+        val HEX_CHARS = "0123456789ABCDEF"
+        val bytes = MessageDigest
+                .getInstance(type)
+                .digest(input.toByteArray())
+        val result = StringBuilder(bytes.size * 2)
+
+        bytes.forEach {
+            val i = it.toInt()
+            result.append(HEX_CHARS[i shr 4 and 0x0f])
+            result.append(HEX_CHARS[i and 0x0f])
+        }
+
+        return result.toString()
+    }
 
 }
