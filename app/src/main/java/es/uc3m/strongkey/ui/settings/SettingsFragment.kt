@@ -1,9 +1,11 @@
 package es.uc3m.strongkey.ui.settings
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,8 +16,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import es.uc3m.strongkey.*
+import es.uc3m.strongkey.GlobalStatus
+import es.uc3m.strongkey.Interfaz
+import es.uc3m.strongkey.R
 import es.uc3m.strongkey.databinding.FragmentSettingsBinding
+import es.uc3m.strongkey.iniciado
 import es.uc3m.strongkey.ui.SharedPreference
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -42,6 +47,10 @@ class SettingsFragment : Fragment() {
     private lateinit var settingsViewModel: SettingsViewModel
     lateinit var globalStatus: GlobalStatus
     var clave: String = ""
+    var AES: String =""
+    // Request code for creating a PDF document.
+    val CREATE_FILE = 1
+
 
 
 
@@ -80,7 +89,20 @@ class SettingsFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode === 1) {
+           /* when (resultCode) {
+                Activity.RESULT_OK -> if (data != null
+                        && data.data != null) {
+                    writeInFile(data.data, "bison is bision")
+                }
+                Activity.RESULT_CANCELED -> {
+                }
+            }*/
+                var path = data?.data!!
+            alterDocument(path, AES)
+            println("Esta es la uri:" + path.toString())
 
+        }
         if (requestCode == 777) {
             val filePath = data?.data!!
             //globalStatus.ruta=filePath!!
@@ -125,9 +147,14 @@ class SettingsFragment : Fragment() {
 
                 }
                 println(encrypt(out.toString(), clave))
+                AES= encrypt(out.toString(), clave)!!
+                println("ESTA ES LA VARIABLE AES:" + AES)
                 //println(hashString("SHA-1",clave))
 
                 llamar(hashString("SHA-1", clave).take(5))
+                createFile()
+
+
             })
             editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", { _, _ ->
                 Toast.makeText(requireContext(), "NOPE", Toast.LENGTH_SHORT).show()
@@ -144,6 +171,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
+    //POPUP PARA INTRODUCIR LA CLAVE AES
     private fun showAddItemDialog(c: Context) {
         val taskEditText = EditText(c)
         val dialog: AlertDialog = AlertDialog.Builder(c)
@@ -156,7 +184,7 @@ class SettingsFragment : Fragment() {
         dialog.show()
     }
 
-
+    //RETROFIT API PWND
     fun llamar(hash: String){
         val client = OkHttpClient.Builder().build()
 
@@ -170,7 +198,7 @@ class SettingsFragment : Fragment() {
 
         result.enqueue(object : Callback<ResponseBody?> {
             override fun onResponse(call: Call<ResponseBody?>, response: Response<ResponseBody?>) {
-                println(response.body()?.string())
+                //println(response.body()?.string())
             }
 
             override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
@@ -181,6 +209,40 @@ class SettingsFragment : Fragment() {
 
     }
 
+    //ABRE EXPLORADOR PARA CREAR FICHERO POR DEFECTO TIPO AES
+    private fun createFile() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/aes"
+            putExtra(Intent.EXTRA_TITLE, "invoice.aes")
+
+            // Optionally, specify a URI for the directory that should be opened in
+            // the system file picker before your app creates the document.
+            //putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
+        }
+        startActivityForResult(intent, CREATE_FILE)
+    }
+
+    //PARA ESCRIBIR DENTRO DE UN FICHERO
+    private fun alterDocument(uri: Uri, contenido: String) {
+        //val contentResolver = requireContext().contentResolver
+        try {
+            context?.contentResolver?.openFileDescriptor(uri, "w")?.use {
+                FileOutputStream(it.fileDescriptor).use {
+                    it.write(
+                            ("${contenido}")
+                                    .toByteArray()
+                    )
+                }
+            }
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    //ENCRIPTAR CON AES
     fun encrypt(strToEncrypt: String, secret_key: String): String? {
         Security.addProvider(BouncyCastleProvider())
         var keyBytes: ByteArray
@@ -223,6 +285,7 @@ class SettingsFragment : Fragment() {
         return null
     }
 
+    //DESENCRIPTAR AES
     fun decryptWithAES(key: String, strToDecrypt: String?): String? {
         Security.addProvider(BouncyCastleProvider())
         var keyBytes: ByteArray
@@ -262,6 +325,7 @@ class SettingsFragment : Fragment() {
         return null
     }
 
+    //HACER HASH DE LA CLAVE AES
     private fun hashString(type: String, input: String): String {
         val HEX_CHARS = "0123456789ABCDEF"
         val bytes = MessageDigest
