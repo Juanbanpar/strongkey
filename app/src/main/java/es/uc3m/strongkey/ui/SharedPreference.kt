@@ -2,6 +2,7 @@ package es.uc3m.strongkey.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 
 /**
  * Created by Kolincodes on 10/05/2018.
@@ -71,5 +72,13 @@ class SharedPreference(val context: Context) {
 
         editor.remove(KEY_NAME)
         editor.commit()
+    }
+
+    fun getAll(): Map<String,*>{
+        val allEntries: Map<String, *> = sharedPref.getAll()
+        for ((key, value) in allEntries) {
+            Log.d("map values", key + ": " + value.toString())
+        }
+        return allEntries
     }
 }
