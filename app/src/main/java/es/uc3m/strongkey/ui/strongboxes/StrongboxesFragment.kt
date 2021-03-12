@@ -44,11 +44,10 @@ class StrongboxesFragment : Fragment() {
     private lateinit var settingsViewModel: SettingsViewModel
     lateinit var globalStatus: GlobalStatus
     var clave: String = ""
-    var AES: String =""
-    var sha1: String =""
-    // Request code for creating a PDF document.
+    var AES: String = ""
+    var sha1: String = ""
     val CREATE_FILE = 1
-    val out =StringBuilder()
+    val out = StringBuilder()
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -128,11 +127,11 @@ class StrongboxesFragment : Fragment() {
             val editAlert = AlertDialog.Builder(requireContext()).create();
             val editView = layoutInflater.inflate(R.layout.edit_text_layout, null);
             editAlert.setView(editView)
-            editAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", { _, _ ->
+            editAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, _ ->
                 val text = editAlert.findViewById<EditText>(R.id.alert_dialog_edit_text).text
-                sha1=text.toString()
+                sha1 = text.toString()
                 Toast.makeText(requireContext(), "Tu texto es:\n$text", Toast.LENGTH_LONG).show()
-                clave= text.toString()
+                clave = text.toString()
                 if (text.toString().length < 32) {
                     println("HOLA")
                     var restantes: Int = 32 - text.toString().length;
@@ -141,29 +140,20 @@ class StrongboxesFragment : Fragment() {
                         clave += "0"
                         contador++
                     }
-
                 }
                 //println(encrypt(out.toString(), clave))
                 llamar(hashString("SHA-1", sha1).take(5))
 
-
-            })
-            editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL", { _, _ ->
+            }
+            editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL") { _, _ ->
                 Toast.makeText(requireContext(), "NOPE", Toast.LENGTH_SHORT).show()
-            })
+            }
 
             editAlert.show()
-
-
-
-
             //println(encrypt(out.toString(), clave))
-
             Toast.makeText(requireContext(), filePath.toString(), Toast.LENGTH_SHORT).show()
         }
     }
-
-
 
 
     //POPUP PARA INTRODUCIR LA CLAVE AES
@@ -199,30 +189,30 @@ class StrongboxesFragment : Fragment() {
                     if (hashes != null) {
                         lines = hashes.split("\\r?\\n").toTypedArray()
                     };
-                    var temporal: String= hashString("SHA-1", sha1)
+                    var temporal: String = hashString("SHA-1", sha1)
                     if (lines != null) {
                         for (line in lines) {
                             if (line.contains(temporal.substring(5),ignoreCase = true)) {
-                                lines= emptyArray()
+                                //lines = emptyArray()
                                 //System.out.println(
                                         //"password found, count: " + line.substring(line.indexOf(":") + 1));
                                 println("contraseña REPE")
                                 val builder = AlertDialog.Builder(requireContext())
                                 //set title for alert dialog
-                                builder.setTitle("UPSS")
+                                builder.setTitle("Upsie dupsie")
                                 //set message for alert dialog
-                                builder.setMessage("Contraseña PWND")
+                                builder.setMessage("Contraseña PWND, ¿deseas continuar?")
                                 //builder.setIcon(android.R.drawable.ic_dialog_alert)
 
                                 //performing positive action
-                                builder.setPositiveButton("Yes"){dialogInterface, which ->
-                                    AES= encrypt(out.toString(), clave)!!
+                                builder.setPositiveButton("Continuar"){dialogInterface, which ->
+                                    AES = encrypt(out.toString(), clave)!!
                                     createFile()
                                 }
 
                                 //performing negative action
-                                builder.setNegativeButton("No"){dialogInterface, which ->
-                                    Toast.makeText(requireContext(),"operacion cancelada",Toast.LENGTH_LONG).show()
+                                builder.setNegativeButton("Cancelar"){dialogInterface, which ->
+                                    Toast.makeText(requireContext(),"Operacion cancelada",Toast.LENGTH_LONG).show()
                                 }
                                 // Create the AlertDialog
                                 val alertDialog: AlertDialog = builder.create()
@@ -234,9 +224,9 @@ class StrongboxesFragment : Fragment() {
                             }
                         }
                     }
-                    lines= emptyArray()
+                    //lines= emptyArray()
                     System.out.println("password not found");
-                    AES= encrypt(out.toString(), clave)!!
+                    AES = encrypt(out.toString(), clave)!!
                     createFile()
                 }
             }
@@ -254,7 +244,7 @@ class StrongboxesFragment : Fragment() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "application/aes"
-            putExtra(Intent.EXTRA_TITLE, "invoice.aes")
+            putExtra(Intent.EXTRA_TITLE, "crypt.aes")
 
             // Optionally, specify a URI for the directory that should be opened in
             // the system file picker before your app creates the document.
