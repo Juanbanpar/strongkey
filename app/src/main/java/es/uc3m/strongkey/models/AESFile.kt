@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "AESFile_table")
 data class AESFile(
     @PrimaryKey
-    val path: String,
-    val uid: String,
-    val extension: String,
-    val password: String
+    var path: String,
+    var uid: String,
+    var extension: String,
+    var password: String
 )

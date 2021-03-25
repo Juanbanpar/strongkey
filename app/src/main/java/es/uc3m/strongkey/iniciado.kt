@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -27,14 +28,23 @@ class iniciado : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val i = intent
         val extras = i.extras
+        val sharedPreference: SharedPreference = SharedPreference(this)
         if (extras!!.containsKey("email")) {
             val something = i.getStringExtra("email")
             if (something != null) {
                 globalStatus.mapa.put("email",something)
+                sharedPreference.save("EMAIL", something)
             }
         }
+        if (extras!!.containsKey("ID")) {
+            val something = i.getStringExtra("ID")
+            if (something != null) {
+                globalStatus.mapa.put("ID",something)
+                sharedPreference.save("ID", something)
+            }
+        }
+
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
-        val sharedPreference: SharedPreference = SharedPreference(this)
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.

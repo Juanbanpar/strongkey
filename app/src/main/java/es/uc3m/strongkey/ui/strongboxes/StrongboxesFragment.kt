@@ -12,12 +12,16 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import es.uc3m.strongkey.*
 import es.uc3m.strongkey.databinding.FragmentStrongboxesBinding
+import es.uc3m.strongkey.models.AESFile
+import es.uc3m.strongkey.models.AESFileRepository
+import es.uc3m.strongkey.ui.ListAdapter
 import es.uc3m.strongkey.ui.SharedPreference
 import es.uc3m.strongkey.ui.settings.SettingsViewModel
 import okhttp3.OkHttpClient
@@ -48,6 +52,11 @@ class StrongboxesFragment : Fragment() {
     var sha1: String = ""
     val CREATE_FILE = 1
     val out = StringBuilder()
+    var extension:String=""
+    lateinit var fichero: AESFile
+    var id: String=""
+    lateinit var Repository: AESFileRepository
+    private lateinit var strongboxesViewModel: StrongboxesViewModel
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -55,6 +64,16 @@ class StrongboxesFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentStrongboxesBinding.inflate(inflater, container, false)
+        val adapter = ListAdapter()
+        val recyclerView = _binding!!.recyclerView
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        strongboxesViewModel = ViewModelProvider(this).get(StrongboxesViewModel::class.java)
+        strongboxesViewModel.readAll.observe(viewLifecycleOwner, {
+                student -> adapter.setData(student)
+        })
+
         return binding.root
     }
 
@@ -62,15 +81,16 @@ class StrongboxesFragment : Fragment() {
         val mainActivity: iniciado= activity as iniciado
         globalStatus = mainActivity.globalStatus
         super.onViewCreated(view, savedInstanceState)
-        settingsViewModel =
-                ViewModelProvider(this).get(SettingsViewModel::class.java)
-        val textView: TextView = binding.textStrongboxes
-        settingsViewModel.text.observe(viewLifecycleOwner, Observer {
+        strongboxesViewModel =
+                ViewModelProvider(this).get(StrongboxesViewModel::class.java)
+        //val textView: TextView = binding.textStrongboxes
+        /*strongboxesViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
-        })
+        })*/
        binding.encriptar.setOnClickListener{
             abrirexplorador()
         }
+
     }
 
     private fun abrirexplorador(){
@@ -81,22 +101,20 @@ class StrongboxesFragment : Fragment() {
         startActivityForResult(Intent.createChooser(intent, "Select a file"), 777)
     }
 
+    suspend fun addDatos(fichero: AESFile){
+        Repository.addAESFile(fichero)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode === 1) {
-            /* when (resultCode) {
-                 Activity.RESULT_OK -> if (data != null
-                         && data.data != null) {
-                     writeInFile(data.data, "bison is bision")
-                 }
-                 Activity.RESULT_CANCELED -> {
-                 }
-             }*/
             var path = data?.data!!
             alterDocument(path, AES)
             AES="0"
-
+            fichero= AESFile(path.toString(),id,extension,hashString("SHA-256", clave))
+            strongboxesViewModel.addFile(fichero)
         }
+
         if (requestCode == 777) {
             val filePath = data?.data!!
             //globalStatus.ruta=filePath!!
@@ -104,8 +122,9 @@ class StrongboxesFragment : Fragment() {
             sharedPreference.save("1", filePath.toString())
             globalStatus.mapa.put("1", filePath.toString())
             var Correo:String = globalStatus.mapa.get("email") as String
+            id= globalStatus.mapa.get("ID") as String
             val lineList = mutableListOf<String>()
-            //var word: String = "primary:"
+            extension=filePath.toString().substringAfterLast('.', "")
             val parcelFileDescriptor = context?.contentResolver?.openFileDescriptor(filePath, "r", null)
             parcelFileDescriptor?.let {
                 val inputStream = FileInputStream(parcelFileDescriptor.fileDescriptor)
