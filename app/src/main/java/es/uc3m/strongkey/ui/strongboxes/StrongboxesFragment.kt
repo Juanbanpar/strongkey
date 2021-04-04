@@ -4,21 +4,23 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
-import androidx.recyclerview.widget.LinearLayoutManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import es.uc3m.strongkey.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import es.uc3m.strongkey.GlobalStatus
+import es.uc3m.strongkey.Interfaz
+import es.uc3m.strongkey.R
 import es.uc3m.strongkey.databinding.FragmentStrongboxesBinding
+import es.uc3m.strongkey.iniciado
 import es.uc3m.strongkey.models.AESFile
 import es.uc3m.strongkey.models.AESFileRepository
 import es.uc3m.strongkey.ui.ListAdapter
@@ -41,6 +43,7 @@ import java.security.NoSuchAlgorithmException
 import java.security.Security
 import javax.crypto.*
 import javax.crypto.spec.SecretKeySpec
+
 
 class StrongboxesFragment : Fragment() {
     private var _binding: FragmentStrongboxesBinding? = null
@@ -70,8 +73,8 @@ class StrongboxesFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         strongboxesViewModel = ViewModelProvider(this).get(StrongboxesViewModel::class.java)
-        strongboxesViewModel.readAll.observe(viewLifecycleOwner, {
-                student -> adapter.setData(student)
+        strongboxesViewModel.readAll.observe(viewLifecycleOwner, { student ->
+            adapter.setData(student)
         })
 
         return binding.root
@@ -97,7 +100,6 @@ class StrongboxesFragment : Fragment() {
         val intent = Intent()
                 .setType("*/*")
                 .setAction(Intent.ACTION_GET_CONTENT)
-
         startActivityForResult(Intent.createChooser(intent, "Select a file"), 777)
     }
 
@@ -109,10 +111,75 @@ class StrongboxesFragment : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode === 1) {
             var path = data?.data!!
+            //Para extraer la extension
+            /*
+            val extension2: String?
+
+            //Check uri format to avoid null
+
+            //Check uri format to avoid null
+            extension2 = if (path.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+                //If scheme is a content
+                val mime = MimeTypeMap.getSingleton()
+                mime.getExtensionFromMimeType(requireContext().contentResolver.getType(path))
+            } else {
+                //If scheme is a File
+                //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
+                MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(path.getPath())).toString())
+            }
+            println("JHKGKJHGKJH:" + extension2)*/
+
+            val fileName: String
+            if (path.getScheme().equals("file")) {
+                fileName = path.getLastPathSegment().toString()
+            } else {
+                var cursor: Cursor? = null
+                try {
+                    cursor = requireContext().getContentResolver().query(path, arrayOf(
+                            MediaStore.Images.ImageColumns.DISPLAY_NAME
+                    ), null, null, null)
+                    if (cursor != null && cursor.moveToFirst()) {
+                        fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME))
+                        println("NOMBRE DEL FICHERO: " + fileName)
+                    }
+                } finally {
+                    cursor?.close()
+                }
+            }
+
+
+
             alterDocument(path, AES)
             AES="0"
-            fichero= AESFile(path.toString(),id,extension,hashString("SHA-256", clave))
+            fichero= AESFile(path.toString(), id, extension, hashString("SHA-256", clave))
             strongboxesViewModel.addFile(fichero)
+        }
+
+        if (requestCode === 2) {
+            var path = data?.data!!
+
+           /* val fileName: String
+            if (path.getScheme().equals("file")) {
+                fileName = path.getLastPathSegment().toString()
+            } else {
+                var cursor: Cursor? = null
+                try {
+                    cursor = requireContext().getContentResolver().query(path, arrayOf(
+                            MediaStore.Images.ImageColumns.DISPLAY_NAME
+                    ), null, null, null)
+                    if (cursor != null && cursor.moveToFirst()) {
+                        fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME))
+                        println("NOMBRE DEL FICHERO: " + fileName)
+                    }
+                } finally {
+                    cursor?.close()
+                }
+            }*/
+            val globalStatus: GlobalStatus = GlobalStatus
+            var final: String= globalStatus.mapa.get(("FICHERO")) as String
+            println("ESTE ES EL FINAL: " +final)
+
+            alterDocument(path, final)
         }
 
         if (requestCode == 777) {
@@ -211,10 +278,10 @@ class StrongboxesFragment : Fragment() {
                     var temporal: String = hashString("SHA-1", sha1)
                     if (lines != null) {
                         for (line in lines) {
-                            if (line.contains(temporal.substring(5),ignoreCase = true)) {
+                            if (line.contains(temporal.substring(5), ignoreCase = true)) {
                                 //lines = emptyArray()
                                 //System.out.println(
-                                        //"password found, count: " + line.substring(line.indexOf(":") + 1));
+                                //"password found, count: " + line.substring(line.indexOf(":") + 1));
                                 println("contraseña REPE")
                                 val builder = AlertDialog.Builder(requireContext())
                                 //set title for alert dialog
@@ -224,14 +291,14 @@ class StrongboxesFragment : Fragment() {
                                 //builder.setIcon(android.R.drawable.ic_dialog_alert)
 
                                 //performing positive action
-                                builder.setPositiveButton("Continuar"){dialogInterface, which ->
+                                builder.setPositiveButton("Continuar") { dialogInterface, which ->
                                     AES = encrypt(out.toString(), clave)!!
                                     createFile()
                                 }
 
                                 //performing negative action
-                                builder.setNegativeButton("Cancelar"){dialogInterface, which ->
-                                    Toast.makeText(requireContext(),"Operacion cancelada",Toast.LENGTH_LONG).show()
+                                builder.setNegativeButton("Cancelar") { dialogInterface, which ->
+                                    Toast.makeText(requireContext(), "Operacion cancelada", Toast.LENGTH_LONG).show()
                                 }
                                 // Create the AlertDialog
                                 val alertDialog: AlertDialog = builder.create()
@@ -258,6 +325,35 @@ class StrongboxesFragment : Fragment() {
 
     }
 
+    //funcion dialogo contraseña
+    fun dialogo(checkHash: String){
+        val editAlert = AlertDialog.Builder(requireContext()).create()
+        val editView = layoutInflater.inflate(R.layout.edit_text_layout, null);
+        editAlert.setView(editView)
+        var temp:String=""
+        editAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, _ ->
+            val text = editAlert.findViewById<EditText>(R.id.alert_dialog_edit_text).text
+            //sha1 = text.toString()
+            Toast.makeText(requireContext(), "Tu texto es:\n$text", Toast.LENGTH_LONG).show()
+            temp = text.toString()
+            if (text.toString().length < 32) {
+                var restantes: Int = 32 - text.toString().length;
+                var contador: Int = 0;
+                while (contador < restantes) {
+                    temp += "0"
+                    contador++
+                }
+            }
+
+        }
+        editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL") { _, _ ->
+            Toast.makeText(requireContext(), "NOPE", Toast.LENGTH_SHORT).show()
+        }
+
+        editAlert.show()
+        println("CONTRASEÑA POPUP: " + temp)
+    }
+
     //ABRE EXPLORADOR PARA CREAR FICHERO POR DEFECTO TIPO AES
     private fun createFile() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -265,10 +361,16 @@ class StrongboxesFragment : Fragment() {
             type = "application/aes"
             putExtra(Intent.EXTRA_TITLE, "crypt.aes")
 
+
             // Optionally, specify a URI for the directory that should be opened in
             // the system file picker before your app creates the document.
             //putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
         }
+        intent.addFlags(
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                        or Intent.FLAG_GRANT_PREFIX_URI_PERMISSION)
         startActivityForResult(intent, CREATE_FILE)
     }
 

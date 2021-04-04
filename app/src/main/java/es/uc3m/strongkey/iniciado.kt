@@ -1,7 +1,9 @@
 package es.uc3m.strongkey
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +16,9 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import es.uc3m.strongkey.ui.SharedPreference
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
+import java.io.IOException
 
 enum class ProviderType{
     BASIC,
@@ -64,6 +69,51 @@ class iniciado : AppCompatActivity() {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 225)
         } else {
             Log.i("Mensaje", "Se tiene permiso para leer!")
+        }
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode === 2) {
+            var path = data?.data!!
+
+            /* val fileName: String
+             if (path.getScheme().equals("file")) {
+                 fileName = path.getLastPathSegment().toString()
+             } else {
+                 var cursor: Cursor? = null
+                 try {
+                     cursor = requireContext().getContentResolver().query(path, arrayOf(
+                             MediaStore.Images.ImageColumns.DISPLAY_NAME
+                     ), null, null, null)
+                     if (cursor != null && cursor.moveToFirst()) {
+                         fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME))
+                         println("NOMBRE DEL FICHERO: " + fileName)
+                     }
+                 } finally {
+                     cursor?.close()
+                 }
+             }*/
+            val globalStatus: GlobalStatus = GlobalStatus
+            var final: String= globalStatus.mapa.get(("FICHERO")) as String
+
+            alterDocument(path, final)
+        }
+    }
+    private fun alterDocument(uri: Uri, contenido: String) {
+        //val contentResolver = requireContext().contentResolver
+        try {
+            contentResolver?.openFileDescriptor(uri, "w")?.use {
+                FileOutputStream(it.fileDescriptor).use {
+                    it.write(
+                            ("${contenido}")
+                                    .toByteArray()
+                    )
+                }
+            }
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
         }
     }
 }
