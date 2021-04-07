@@ -194,7 +194,7 @@ class StrongboxesFragment : Fragment() {
             var sharedPreference:SharedPreference= SharedPreference(requireContext())
             sharedPreference.save("1", filePath.toString())
             globalStatus.mapa.put("1", filePath.toString())
-            var Correo:String = globalStatus.mapa.get("email") as String
+            //var Correo:String = globalStatus.mapa.get("email") as String
             id= globalStatus.mapa.get("ID") as String
             val lineList = mutableListOf<String>()
             extension=filePath.toString().substringAfterLast('.', "")

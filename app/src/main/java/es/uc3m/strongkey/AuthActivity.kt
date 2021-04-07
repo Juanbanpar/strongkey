@@ -33,6 +33,7 @@ class AuthActivity : AppCompatActivity() {
     private var emilio: String="null"
     private var vid:String="null"
     private var resend:String="null"
+    private var numeroT:String=""
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,26 +111,28 @@ class AuthActivity : AppCompatActivity() {
                    // Log.d(TAG, "onCodeSent:$verificationId")
 
                     // Save verification ID and resending token so we can use them later
-                    var prefijo:String= findViewById<TextView>(R.id.prefijo).text.toString()
+                    /*var prefijo:String= findViewById<TextView>(R.id.prefijo).text.toString()
                     if(prefijo.equals(verificationId)){
                         signInWithPhoneAuth()
-                    }
+                    }*/
 
                 }
             }
-            var numeroT:String= findViewById<TextView>(R.id.telefono).text.toString()
-            var prefijo:String= findViewById<TextView>(R.id.prefijo).text.toString()
+            numeroT= findViewById<TextView>(R.id.telefono).text.toString()
+            //var prefijo:String= findViewById<TextView>(R.id.prefijo).text.toString()
             val options = PhoneAuthOptions.newBuilder()
                 .setPhoneNumber(numeroT)       // Phone number to verify
                 .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
                 .setActivity(this)                 // Activity (for callback binding)
                 .setCallbacks(callbacks)          // OnVerificationStateChangedCallbacks
                 .build()
-            //val firebaseAuth = Firebase.auth
-            //val firebaseAuthSettings = firebaseAuth.firebaseAuthSettings
+            val firebaseAuth = Firebase.auth
+            val firebaseAuthSettings = firebaseAuth.firebaseAuthSettings
             // Force reCAPTCHA flow
             // Force reCAPTCHA flow
             //FirebaseAuth.getInstance().getFirebaseAuthSettings().forceRecaptchaFlowForTesting(false);
+
+            //firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber(numeroT, "654321")
             PhoneAuthProvider.verifyPhoneNumber(options)
 
         }
@@ -163,8 +166,9 @@ class AuthActivity : AppCompatActivity() {
     private fun signInWithPhoneAuthCredential(patata:PhoneAuthCredential){
         val homeIntent = Intent(this, iniciado::class.java).apply {
             putExtra("provider", "BASIC")
+            putExtra("ID",numeroT)
         }
-
+        patata.provider
         startActivity(homeIntent)
     }
 
@@ -179,11 +183,11 @@ class AuthActivity : AppCompatActivity() {
     private fun authUser(executor: Executor) {
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             // 2
-            .setTitle("R.string.auth_title")
+            .setTitle("Introduzca la huella")
             // 3
-            .setSubtitle("R.string.auth_subtitle")
+            .setSubtitle("Alternativa patrón")
             // 4
-            .setDescription("R.string.auth_description")
+            .setDescription("Presione su dedo")
             // 5
             .setDeviceCredentialAllowed(true)
             // 6
