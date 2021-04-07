@@ -5,17 +5,20 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import es.uc3m.strongkey.ui.SharedPreference
+import es.uc3m.strongkey.ui.strongboxes.StrongboxesViewModel
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
@@ -70,32 +73,20 @@ class iniciado : AppCompatActivity() {
         } else {
             Log.i("Mensaje", "Se tiene permiso para leer!")
         }
+
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode === 2) {
             var path = data?.data!!
-
-            /* val fileName: String
-             if (path.getScheme().equals("file")) {
-                 fileName = path.getLastPathSegment().toString()
-             } else {
-                 var cursor: Cursor? = null
-                 try {
-                     cursor = requireContext().getContentResolver().query(path, arrayOf(
-                             MediaStore.Images.ImageColumns.DISPLAY_NAME
-                     ), null, null, null)
-                     if (cursor != null && cursor.moveToFirst()) {
-                         fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME))
-                         println("NOMBRE DEL FICHERO: " + fileName)
-                     }
-                 } finally {
-                     cursor?.close()
-                 }
-             }*/
             val globalStatus: GlobalStatus = GlobalStatus
             var final: String= globalStatus.mapa.get(("FICHERO")) as String
-
+            var ruta: String = globalStatus.mapa.get(("RUTAA")) as String
+            lateinit var strongboxesViewModel: StrongboxesViewModel
+            strongboxesViewModel =
+                    ViewModelProvider(this).get(StrongboxesViewModel::class.java)
+            strongboxesViewModel.removeFile(ruta)
             alterDocument(path, final)
         }
     }

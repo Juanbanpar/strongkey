@@ -2,6 +2,7 @@ package es.uc3m.strongkey.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
 import android.util.Log
 
 /**
@@ -37,6 +38,7 @@ class SharedPreference(val context: Context) {
 
         editor.commit()
     }
+
 
     fun getValueString(KEY_NAME: String): String? {
 

@@ -8,4 +8,8 @@ class AESFileRepository(private val aesFileDao: AESFileDao){
     suspend fun addAESFile(aesFile: AESFile){
         aesFileDao.addAESFile(aesFile)
     }
+
+    suspend fun removeAESFile(clave: String){
+        aesFileDao.deleteAESFile(clave)
+    }
 }

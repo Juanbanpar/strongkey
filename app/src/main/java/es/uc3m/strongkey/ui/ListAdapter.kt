@@ -1,5 +1,6 @@
 package es.uc3m.strongkey.ui
 
+import android.R.attr.key
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
@@ -10,10 +11,12 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.net.toUri
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import es.uc3m.strongkey.GlobalStatus
 import es.uc3m.strongkey.databinding.RecyclerViewItemBinding
 import es.uc3m.strongkey.models.AESFile
+import es.uc3m.strongkey.ui.strongboxes.StrongboxesViewModel
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.io.FileInputStream
 import java.io.InputStreamReader
@@ -35,11 +38,15 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
     class MyViewHolder(val mContext: Context, val binding: RecyclerViewItemBinding): RecyclerView.ViewHolder(binding.root){
         val out2=StringBuilder()
         var descifrado: String=""
+        var nombreReshulon: String=""
+        var rutaa: String=""
         init {
             binding.firstName.setOnClickListener{
                 var clave: String= binding.LastName.text as String
                 var ruta: String=binding.age.text as String
                 var tipo: String=binding.firstName.text as String
+                nombreReshulon=tipo
+                rutaa=ruta
 
 
                 /*var diag = StrongboxesFragment()
@@ -77,7 +84,7 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                             hash = result.toString()
                             if (hash.equals(clave)) {
                                 println("EUREKA")
-                                val uri= ruta.toUri()
+                                val uri = ruta.toUri()
                                 val parcelFileDescriptor = mContext?.contentResolver?.openFileDescriptor(uri, "r", null)
                                 parcelFileDescriptor?.let {
                                     val inputStream = FileInputStream(parcelFileDescriptor.fileDescriptor)
@@ -95,9 +102,10 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                                     inputStream.close()
                                     //PARA LEER EL CONTENIDO
                                 }
-                                descifrado=decryptWithAES(input,out2.toString())!!
-                                println("descifrado "+ descifrado)
+                                descifrado = decryptWithAES(input, out2.toString())!!
+                                println("descifrado " + descifrado)
                                 createFile()
+
                                 //abrirexplorador()
                                 //decryptWithAES()
                             } else {
@@ -127,8 +135,9 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
         private fun createFile() {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
-                type = "image/jpg"
-                putExtra(Intent.EXTRA_TITLE, "c15.jpg")
+                type = "text/plain"
+                val X: String = nombreReshulon.substring(0, nombreReshulon.length - 4)
+                putExtra(Intent.EXTRA_TITLE, X)
 
 
                 // Optionally, specify a URI for the directory that should be opened in
@@ -136,7 +145,8 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                 //putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
             }
             val globalStatus: GlobalStatus = GlobalStatus
-            globalStatus.mapa.put("FICHERO",descifrado)
+            globalStatus.mapa.put("FICHERO", descifrado)
+            globalStatus.mapa.put("RUTAA", rutaa)
             (mContext as Activity).startActivityForResult(intent, 2)
         }
         private fun decryptWithAES(key: String, strToDecrypt: String?): String? {

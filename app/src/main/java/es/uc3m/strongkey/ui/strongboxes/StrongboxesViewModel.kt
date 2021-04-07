@@ -26,4 +26,10 @@ class StrongboxesViewModel(application: Application) : AndroidViewModel(applicat
             repository.addAESFile(fichero)
         }
     }
+
+    fun removeFile(clave: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.removeAESFile(clave)
+        }
+    }
 }
