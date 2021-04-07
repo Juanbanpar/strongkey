@@ -17,6 +17,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <EditText
+            android:id="@+id/telefono"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="phone" />
+
+        <EditText
+            android:id="@+id/prefijo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/SMS"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Login SMS" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -32,10 +52,12 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:text="Google OAuth2"
-                android:textAlignment="textStart"
+                android:textAlignment="center"
                 android:textColor="@color/design_default_color_primary_dark"
                 android:textColorLink="#FFFFFF"
                 tools:text="Google" />
+
         </LinearLayout>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

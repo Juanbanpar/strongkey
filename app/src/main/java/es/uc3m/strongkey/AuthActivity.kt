@@ -3,8 +3,10 @@ package es.uc3m.strongkey
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -15,17 +17,22 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.FirebaseException
+import com.google.firebase.FirebaseTooManyRequestsException
+import com.google.firebase.auth.*
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import es.uc3m.strongkey.ui.SharedPreference
 import java.util.concurrent.Executor
+import java.util.concurrent.TimeUnit
 
 class AuthActivity : AppCompatActivity() {
 
     private val GOOGLE_SIGN_IN = 100
     private var identificacion: String="null"
     private var emilio: String="null"
+    private var vid:String="null"
+    private var resend:String="null"
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +75,64 @@ class AuthActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<Button>(R.id.SMS).setOnClickListener{
+            var callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+                override fun onVerificationCompleted(credential: PhoneAuthCredential) {
+                    // This callback will be invoked in two situations:
+                    // 1 - Instant verification. In some cases the phone number can be instantly
+                    //     verified without needing to send or enter a verification code.
+                    // 2 - Auto-retrieval. On some devices Google Play services can automatically
+                    //     detect the incoming verification SMS and perform verification without
+                    //     user action.
+                    //Log.d(TAG, "onVerificationCompleted:$credential")
+                    signInWithPhoneAuthCredential(credential)
+                }
+
+                override fun onVerificationFailed(e: FirebaseException) {
+                    // This callback is invoked in an invalid request for verification is made,
+                    // for instance if the the phone number format is not valid.
+                    //Log.w(TAG, "onVerificationFailed", e)
+
+                    if (e is FirebaseAuthInvalidCredentialsException) {
+                        // Invalid request
+                    } else if (e is FirebaseTooManyRequestsException) {
+                        // The SMS quota for the project has been exceeded
+                    }
+
+                    // Show a message and update the UI
+                }
+
+                override fun onCodeSent(verificationId: String, token: PhoneAuthProvider.ForceResendingToken) {
+                    // The SMS verification code has been sent to the provided phone number, we
+                    // now need to ask the user to enter the code and then construct a credential
+                    // by combining the code with a verification ID.
+                   // Log.d(TAG, "onCodeSent:$verificationId")
+
+                    // Save verification ID and resending token so we can use them later
+                    var prefijo:String= findViewById<TextView>(R.id.prefijo).text.toString()
+                    if(prefijo.equals(verificationId)){
+                        signInWithPhoneAuth()
+                    }
+
+                }
+            }
+            var numeroT:String= findViewById<TextView>(R.id.telefono).text.toString()
+            var prefijo:String= findViewById<TextView>(R.id.prefijo).text.toString()
+            val options = PhoneAuthOptions.newBuilder()
+                .setPhoneNumber(numeroT)       // Phone number to verify
+                .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
+                .setActivity(this)                 // Activity (for callback binding)
+                .setCallbacks(callbacks)          // OnVerificationStateChangedCallbacks
+                .build()
+            //val firebaseAuth = Firebase.auth
+            //val firebaseAuthSettings = firebaseAuth.firebaseAuthSettings
+            // Force reCAPTCHA flow
+            // Force reCAPTCHA flow
+            //FirebaseAuth.getInstance().getFirebaseAuthSettings().forceRecaptchaFlowForTesting(false);
+            PhoneAuthProvider.verifyPhoneNumber(options)
+
+        }
 
         findViewById<Button>(R.id.googleButton).setOnClickListener {
             //configuracion
@@ -93,6 +158,22 @@ class AuthActivity : AppCompatActivity() {
 
         startActivity(homeIntent)
 
+    }
+
+    private fun signInWithPhoneAuthCredential(patata:PhoneAuthCredential){
+        val homeIntent = Intent(this, iniciado::class.java).apply {
+            putExtra("provider", "BASIC")
+        }
+
+        startActivity(homeIntent)
+    }
+
+    private fun signInWithPhoneAuth(){
+        val homeIntent = Intent(this, iniciado::class.java).apply {
+            putExtra("provider", "BASIC")
+        }
+
+        startActivity(homeIntent)
     }
 
     private fun authUser(executor: Executor) {
