@@ -1,13 +1,30 @@
 package es.uc3m.strongkey.ui.wallet
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
+import es.uc3m.strongkey.models.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class WalletViewModel : ViewModel() {
+class WalletViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is dashboard Fragment"
+    val readAll: LiveData<List<Wallet>>
+    private val repository: WalletRepository
+    init {
+        val wallefiledao = WalletDatabase.getDatabase(application).WalletDAO()
+        repository = WalletRepository(wallefiledao)
+        readAll = repository.readAll
     }
-    val text: LiveData<String> = _text
+
+    fun addFile(fichero: Wallet){
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.addWallet(fichero)
+        }
+    }
+
+    fun removeFile(clave: String){
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.removeWallet(clave)
+        }
+    }
 }

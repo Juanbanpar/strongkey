@@ -55,10 +55,10 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                 var hash:String=""
                 val taskEditText = EditText(mContext)
                 val dialog: AlertDialog = AlertDialog.Builder(mContext)
-                        .setTitle("Add a new task")
-                        .setMessage("What do you want to do next?")
+                        .setTitle("Introduce la contraseña")
+                        .setMessage("En el siguiente campo")
                         .setView(taskEditText)
-                        .setPositiveButton("Add", DialogInterface.OnClickListener { dialog, which ->
+                        .setPositiveButton("Desencriptar", DialogInterface.OnClickListener { dialog, which ->
                             input = taskEditText.text.toString()
                             println("PRE 0: " + input)
                             if (input.length < 32) {
@@ -109,10 +109,10 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                                 //abrirexplorador()
                                 //decryptWithAES()
                             } else {
-                                println("NO COINCIDE")
+                                Toast.makeText(mContext, "Contraseña incorrecta", Toast.LENGTH_LONG).show()
                             }
                         })
-                        .setNegativeButton("Cancel", null)
+                        .setNegativeButton("Cancelar", null)
                         .create()
                 dialog.show()
 
