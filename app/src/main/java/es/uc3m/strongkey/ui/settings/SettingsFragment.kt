@@ -46,13 +46,6 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var settingsViewModel: SettingsViewModel
     lateinit var globalStatus: GlobalStatus
-    var clave: String = ""
-    var AES: String =""
-    // Request code for creating a PDF document.
-    val CREATE_FILE = 1
-
-
-
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -70,12 +63,14 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         settingsViewModel =
             ViewModelProvider(this).get(SettingsViewModel::class.java)
+        /*
         val textView: TextView = binding.textSettings
         settingsViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
+         */
         binding.button.setOnClickListener{
-            //abrirexplorador()
+            //logout
         }
     }
 

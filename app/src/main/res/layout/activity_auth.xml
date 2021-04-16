@@ -22,7 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="phone" />
+            android:inputType="phone"
+            android:importantForAutofill="no" />
 
         <Button
             android:id="@+id/SMS"
@@ -46,7 +47,7 @@
                 android:paddingEnd="16dp"
                 android:text="Google OAuth2"
                 android:textAlignment="center"
-                android:textColor="@color/design_default_color_primary_dark"
+                android:textColor="@color/design_default_color_background"
                 android:textColorLink="#FFFFFF"
                 tools:text="Google" />
 

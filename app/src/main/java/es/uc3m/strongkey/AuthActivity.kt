@@ -128,11 +128,11 @@ class AuthActivity : AppCompatActivity() {
                 .build()
             val firebaseAuth = Firebase.auth
             val firebaseAuthSettings = firebaseAuth.firebaseAuthSettings
-            // Force reCAPTCHA flow
-            // Force reCAPTCHA flow
-            //FirebaseAuth.getInstance().getFirebaseAuthSettings().forceRecaptchaFlowForTesting(false);
 
-            //firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber(numeroT, "654321")
+            //Las dos líneas siguientes son para pruebas en el emulador, deben comentarse para casos reales
+            FirebaseAuth.getInstance().getFirebaseAuthSettings().forceRecaptchaFlowForTesting(false);
+            firebaseAuthSettings.setAutoRetrievedSmsCodeForPhoneNumber(numeroT, "654321")
+
             PhoneAuthProvider.verifyPhoneNumber(options)
 
         }

@@ -27,6 +27,7 @@ import es.uc3m.strongkey.models.AESFileRepository
 import es.uc3m.strongkey.ui.ListAdapter
 import es.uc3m.strongkey.ui.SharedPreference
 import es.uc3m.strongkey.ui.settings.SettingsViewModel
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
 import org.bouncycastle.jce.provider.BouncyCastleProvider
@@ -183,7 +184,7 @@ class StrongboxesFragment : Fragment() {
             }*/
             val globalStatus: GlobalStatus = GlobalStatus
             var final: String= globalStatus.mapa.get(("FICHERO")) as String
-            println("ESTE ES EL FINAL: " +final)
+            println("ESTE ES EL FINAL: " + final)
 
             alterDocument(path, final)
         }
@@ -275,13 +276,21 @@ class StrongboxesFragment : Fragment() {
 
     //RETROFIT API PWND
     fun llamar(hash: String){
-        val client = OkHttpClient.Builder().build()
+
+        val certificatePinner: CertificatePinner = CertificatePinner.Builder()
+                .add("api.pwnedpasswords.com", "sha256/Y9mvm0exBk1JoQ57f9Vm28jKo5lFm/woKcVxrYxu80o=")
+                .build()
+
+        val client = OkHttpClient.Builder()
+                .certificatePinner(certificatePinner)
+                .build()
 
         val retrofit = Retrofit.Builder()
                 .baseUrl("https://api.pwnedpasswords.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build()
+
         val service =  retrofit.create(Interfaz::class.java)
         val result: Call<ResponseBody> = service.getPWND(hash)
 
