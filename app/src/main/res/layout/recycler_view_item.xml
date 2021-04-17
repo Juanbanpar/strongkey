@@ -6,21 +6,21 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/firstName"
+        android:id="@+id/name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:text="TextView1" />
 
     <TextView
-        android:id="@+id/LastName"
+        android:id="@+id/clave"
         android:layout_width="match_parent"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:layout_height="wrap_content"
         android:text="TextView2" />
 
     <TextView
-        android:id="@+id/age"
+        android:id="@+id/ruta"
         android:layout_width="match_parent"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:layout_height="wrap_content"

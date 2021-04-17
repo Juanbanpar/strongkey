@@ -63,12 +63,7 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         settingsViewModel =
             ViewModelProvider(this).get(SettingsViewModel::class.java)
-        /*
-        val textView: TextView = binding.textSettings
-        settingsViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-         */
+
         binding.button.setOnClickListener{
             //logout
         }

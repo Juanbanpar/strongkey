@@ -34,19 +34,13 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider
 
 
 class ListAdapterWallet:RecyclerView.Adapter<ListAdapterWallet.MyViewHolder>()  {
-    private var studentList = emptyList<Wallet>()
+    private var keyList = emptyList<Wallet>()
 
     class MyViewHolder(val mContext: Context, val binding: RecyclerViewItemBinding) : RecyclerView.ViewHolder(binding.root){
         init {
             var navController: NavController? = null
-            binding.firstName.setOnClickListener{
-                //val position: Int = adapterPosition
-                //navController = Navigation.findNavController(itemView)
-
-                //navController!!.navigate(R.id.action_listFragment_to_saveFragment)
-                Toast.makeText(itemView.context, "You clicked on item ${position +1}", Toast.LENGTH_SHORT).show()
-
-                var temp:String=binding.firstName.text as String
+            binding.name.setOnClickListener{
+                var temp:String=binding.name.text as String
                 val intent = Intent(Intent.ACTION_VIEW, temp.toUri())
                 mContext.startActivity(intent)
 
@@ -62,19 +56,19 @@ class ListAdapterWallet:RecyclerView.Adapter<ListAdapterWallet.MyViewHolder>()  
     }
 
     override fun onBindViewHolder(holder: ListAdapterWallet.MyViewHolder, position: Int) {
-        val currentItem = studentList[position]
+        val currentItem = keyList[position]
         with(holder){
-            binding.firstName.text = currentItem.path
+            binding.name.text = currentItem.path
 
         }
     }
 
     override fun getItemCount(): Int {
-        return studentList.size
+        return keyList.size
     }
 
-    fun setData(studentList: List<Wallet>){
-        this.studentList = studentList
+    fun setData(keyList: List<Wallet>){
+        this.keyList = keyList
         notifyDataSetChanged()
     }
 }

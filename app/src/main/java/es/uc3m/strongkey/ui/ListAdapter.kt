@@ -33,24 +33,21 @@ import javax.crypto.spec.SecretKeySpec
 
 
 class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
-    private var studentList = emptyList<AESFile>()
+    private var fileList = emptyList<AESFile>()
 
     class MyViewHolder(val mContext: Context, val binding: RecyclerViewItemBinding): RecyclerView.ViewHolder(binding.root){
         val out2=StringBuilder()
         var descifrado: String=""
-        var nombreReshulon: String=""
+        var nombre: String=""
         var rutaa: String=""
         init {
-            binding.firstName.setOnClickListener{
-                var clave: String= binding.LastName.text as String
-                var ruta: String=binding.age.text as String
-                var tipo: String=binding.firstName.text as String
-                nombreReshulon=tipo
+            binding.name.setOnClickListener{
+                var clave: String= binding.clave.text as String
+                var ruta: String=binding.ruta.text as String
+                var tipo: String=binding.name.text as String
+                nombre=tipo
                 rutaa=ruta
 
-
-                /*var diag = StrongboxesFragment()
-                diag.dialogo(clave)*/
                 var input: String=""
                 var hash:String=""
                 val taskEditText = EditText(mContext)
@@ -83,14 +80,10 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                             }
                             hash = result.toString()
                             if (hash.equals(clave)) {
-                                println("EUREKA")
                                 val uri = ruta.toUri()
                                 val parcelFileDescriptor = mContext?.contentResolver?.openFileDescriptor(uri, "r", null)
                                 parcelFileDescriptor?.let {
                                     val inputStream = FileInputStream(parcelFileDescriptor.fileDescriptor)
-                                    /*val file = File(context.cacheDir, context.contentResolver.getFileName(filePath))
-                                    val outputStream = FileOutputStream(file)
-                                    IOUtils.copy(inputStream, outputStream)*/
                                     val bufferSize = 1024
                                     val buffer = CharArray(bufferSize)
 
@@ -105,9 +98,6 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                                 descifrado = decryptWithAES(input, out2.toString())!!
                                 println("descifrado " + descifrado)
                                 createFile()
-
-                                //abrirexplorador()
-                                //decryptWithAES()
                             } else {
                                 Toast.makeText(mContext, "Contraseña incorrecta", Toast.LENGTH_LONG).show()
                             }
@@ -118,31 +108,16 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
 
                 val position: Int = adapterPosition
                 Toast.makeText(itemView.context, "You clicked on item ${position + 1}", Toast.LENGTH_SHORT).show()
-
-                /*val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))
-                mContext.startActivity(intent)*/
             }
-        }
-
-        private fun abrirexplorador(){
-            val intent = Intent()
-                    .setType("*/*")
-                    .setAction(Intent.ACTION_GET_CONTENT)
-            (mContext as Activity).startActivityForResult(intent, 775)
-            //startActivityForResult(Intent.createChooser(intent, "Select a file"), 777)
         }
 
         private fun createFile() {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "text/plain"
-                val X: String = nombreReshulon.substring(0, nombreReshulon.length - 4)
+                val X: String = nombre.substring(0, nombre.length - 4)
                 putExtra(Intent.EXTRA_TITLE, X)
 
-
-                // Optionally, specify a URI for the directory that should be opened in
-                // the system file picker before your app creates the document.
-                //putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
             }
             val globalStatus: GlobalStatus = GlobalStatus
             globalStatus.mapa.put("FICHERO", descifrado)
@@ -198,21 +173,21 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val currentItem = studentList[position]
+        val currentItem = fileList[position]
         with(holder){
-            binding.firstName.text = currentItem.extension
-            binding.LastName.text = currentItem.password
-            binding.age.text = currentItem.path
+            binding.name.text = currentItem.extension
+            binding.clave.text = currentItem.password
+            binding.ruta.text = currentItem.path
         }
     }
 
     override fun getItemCount(): Int {
-        return studentList.size
+        return fileList.size
     }
 
 
-    fun setData(studentList: List<AESFile>){
-        this.studentList = studentList
+    fun setData(fileList: List<AESFile>){
+        this.fileList = fileList
         notifyDataSetChanged()
     }
 

@@ -75,8 +75,8 @@ class StrongboxesFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         strongboxesViewModel = ViewModelProvider(this).get(StrongboxesViewModel::class.java)
-        strongboxesViewModel.readAll.observe(viewLifecycleOwner, { student ->
-            adapter.setData(student)
+        strongboxesViewModel.readAll.observe(viewLifecycleOwner, { file ->
+            adapter.setData(file)
         })
 
         return binding.root
@@ -118,24 +118,6 @@ class StrongboxesFragment : Fragment() {
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             contentResolver.takePersistableUriPermission(path, takeFlags)
 
-            //Para extraer la extension
-            /*
-            val extension2: String?
-
-            //Check uri format to avoid null
-
-            //Check uri format to avoid null
-            extension2 = if (path.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-                //If scheme is a content
-                val mime = MimeTypeMap.getSingleton()
-                mime.getExtensionFromMimeType(requireContext().contentResolver.getType(path))
-            } else {
-                //If scheme is a File
-                //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
-                MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(path.getPath())).toString())
-            }
-            println("JHKGKJHGKJH:" + extension2)*/
-
             var fileName: String=""
             if (path.getScheme().equals("file")) {
                 fileName = path.getLastPathSegment().toString()
@@ -165,23 +147,6 @@ class StrongboxesFragment : Fragment() {
         if (requestCode === 2) {
             var path = data?.data!!
 
-           /* val fileName: String
-            if (path.getScheme().equals("file")) {
-                fileName = path.getLastPathSegment().toString()
-            } else {
-                var cursor: Cursor? = null
-                try {
-                    cursor = requireContext().getContentResolver().query(path, arrayOf(
-                            MediaStore.Images.ImageColumns.DISPLAY_NAME
-                    ), null, null, null)
-                    if (cursor != null && cursor.moveToFirst()) {
-                        fileName = cursor.getString(cursor.getColumnIndex(MediaStore.Images.ImageColumns.DISPLAY_NAME))
-                        println("NOMBRE DEL FICHERO: " + fileName)
-                    }
-                } finally {
-                    cursor?.close()
-                }
-            }*/
             val globalStatus: GlobalStatus = GlobalStatus
             var final: String= globalStatus.mapa.get(("FICHERO")) as String
             println("ESTE ES EL FINAL: " + final)
@@ -191,7 +156,6 @@ class StrongboxesFragment : Fragment() {
 
         if (requestCode == 777) {
             val filePath = data?.data!!
-            //globalStatus.ruta=filePath!!
             var sharedPreference:SharedPreference= SharedPreference(requireContext())
             sharedPreference.save("1", filePath.toString())
             globalStatus.mapa.put("1", filePath.toString())
@@ -202,9 +166,6 @@ class StrongboxesFragment : Fragment() {
             val parcelFileDescriptor = context?.contentResolver?.openFileDescriptor(filePath, "r", null)
             parcelFileDescriptor?.let {
                 val inputStream = FileInputStream(parcelFileDescriptor.fileDescriptor)
-                /*val file = File(context.cacheDir, context.contentResolver.getFileName(filePath))
-                val outputStream = FileOutputStream(file)
-                IOUtils.copy(inputStream, outputStream)*/
                 val bufferSize = 1024
                 val buffer = CharArray(bufferSize)
 
