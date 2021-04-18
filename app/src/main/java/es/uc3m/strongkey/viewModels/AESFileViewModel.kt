@@ -20,7 +20,7 @@ class AESFileViewModel(application: Application): AndroidViewModel(application){
         readAll = repository.readAll
     }
 
-    fun addStudent(aesFile: AESFile){
+    fun addAESFile(aesFile: AESFile){
         viewModelScope.launch(Dispatchers.IO) {
             repository.addAESFile(aesFile)
         }

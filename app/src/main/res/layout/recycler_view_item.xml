@@ -15,14 +15,16 @@
     <TextView
         android:id="@+id/clave"
         android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="TextView2"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:layout_height="wrap_content"
-        android:text="TextView2" />
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/ruta"
         android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:text="TextView3"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:layout_height="wrap_content"
-        android:text="TextView3" />
+        android:visibility="invisible" />
 </LinearLayout>

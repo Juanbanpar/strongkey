@@ -44,6 +44,7 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.Security
 import javax.crypto.*
+import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 
@@ -136,8 +137,6 @@ class StrongboxesFragment : Fragment() {
                 }
             }
 
-
-
             alterDocument(path, AES)
             AES="0"
             fichero= AESFile(path.toString(), id, fileName, hashString("SHA-256", clave))
@@ -207,32 +206,6 @@ class StrongboxesFragment : Fragment() {
             //println(encrypt(out.toString(), clave))
             Toast.makeText(requireContext(), filePath.toString(), Toast.LENGTH_SHORT).show()
         }
-    }
-
-
-    //POPUP PARA INTRODUCIR LA CLAVE AES
-    private fun showAddItemDialog(c: Context) {
-        val taskEditText = EditText(c)
-        val dialog: AlertDialog = AlertDialog.Builder(c)
-                .setTitle("Add a new task")
-                .setMessage("What do you want to do next?")
-                .setView(taskEditText)
-                .setPositiveButton("Add", DialogInterface.OnClickListener { dialog, which -> clave = taskEditText.text.toString() })
-                .setNegativeButton("Cancel", null)
-                .create()
-        dialog.show()
-    }
-
-    //pedir permisos para la carpeta
-    fun openDirectory(pickerInitialUri: Uri) {
-        // Choose a directory using the system's file picker.
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-            // Optionally, specify a URI for the directory that should be opened in
-            // the system file picker when it loads.
-            putExtra(DocumentsContract.EXTRA_INITIAL_URI, pickerInitialUri)
-        }
-
-        startActivityForResult(intent, 100)
     }
 
     //RETROFIT API PWND
@@ -313,35 +286,6 @@ class StrongboxesFragment : Fragment() {
 
     }
 
-    //funcion dialogo contraseña
-    fun dialogo(checkHash: String){
-        val editAlert = AlertDialog.Builder(requireContext()).create()
-        val editView = layoutInflater.inflate(R.layout.edit_text_layout, null);
-        editAlert.setView(editView)
-        var temp:String=""
-        editAlert.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, _ ->
-            val text = editAlert.findViewById<EditText>(R.id.alert_dialog_edit_text).text
-            //sha1 = text.toString()
-            Toast.makeText(requireContext(), "Tu texto es:\n$text", Toast.LENGTH_LONG).show()
-            temp = text.toString()
-            if (text.toString().length < 32) {
-                var restantes: Int = 32 - text.toString().length;
-                var contador: Int = 0;
-                while (contador < restantes) {
-                    temp += "0"
-                    contador++
-                }
-            }
-
-        }
-        editAlert.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL") { _, _ ->
-            Toast.makeText(requireContext(), "NOPE", Toast.LENGTH_SHORT).show()
-        }
-
-        editAlert.show()
-        println("CONTRASEÑA POPUP: " + temp)
-    }
-
     //ABRE EXPLORADOR PARA CREAR FICHERO POR DEFECTO TIPO AES
     private fun createFile() {
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -390,11 +334,12 @@ class StrongboxesFragment : Fragment() {
         try {
             keyBytes = secret_key.toByteArray(charset("UTF8"))
             val skey = SecretKeySpec(keyBytes, "AES")
+            val iv = IvParameterSpec(secret_key.substring(0, 16).toByteArray(Charsets.UTF_8))
             val input = strToEncrypt.toByteArray(charset("UTF8"))
 
             synchronized(Cipher::class.java) {
-                val cipher = Cipher.getInstance("AES/ECB/PKCS7Padding")
-                cipher.init(Cipher.ENCRYPT_MODE, skey)
+                val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+                cipher.init(Cipher.ENCRYPT_MODE, skey, iv)
 
                 val cipherText = ByteArray(cipher.getOutputSize(input.size))
                 var ctLength = cipher.update(
@@ -405,46 +350,6 @@ class StrongboxesFragment : Fragment() {
                 return String(
                         Base64.encode(cipherText)
                 )
-            }
-        } catch (uee: UnsupportedEncodingException) {
-            uee.printStackTrace()
-        } catch (ibse: IllegalBlockSizeException) {
-            ibse.printStackTrace()
-        } catch (bpe: BadPaddingException) {
-            bpe.printStackTrace()
-        } catch (ike: InvalidKeyException) {
-            ike.printStackTrace()
-        } catch (nspe: NoSuchPaddingException) {
-            nspe.printStackTrace()
-        } catch (nsae: NoSuchAlgorithmException) {
-            nsae.printStackTrace()
-        } catch (e: ShortBufferException) {
-            e.printStackTrace()
-        }
-
-        return null
-    }
-
-    //DESENCRIPTAR AES
-    fun decryptWithAES(key: String, strToDecrypt: String?): String? {
-        Security.addProvider(BouncyCastleProvider())
-        var keyBytes: ByteArray
-
-        try {
-            keyBytes = key.toByteArray(charset("UTF8"))
-            val skey = SecretKeySpec(keyBytes, "AES")
-            val input = org.bouncycastle.util.encoders.Base64
-                    .decode(strToDecrypt?.trim { it <= ' ' }?.toByteArray(charset("UTF8")))
-
-            synchronized(Cipher::class.java) {
-                val cipher = Cipher.getInstance("AES/ECB/PKCS7Padding")
-                cipher.init(Cipher.DECRYPT_MODE, skey)
-
-                val plainText = ByteArray(cipher.getOutputSize(input.size))
-                var ptLength = cipher.update(input, 0, input.size, plainText, 0)
-                ptLength += cipher.doFinal(plainText, ptLength)
-                val decryptedString = String(plainText)
-                return decryptedString.trim { it <= ' ' }
             }
         } catch (uee: UnsupportedEncodingException) {
             uee.printStackTrace()

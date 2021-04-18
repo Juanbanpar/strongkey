@@ -5,11 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
@@ -40,14 +38,14 @@ class iniciado : AppCompatActivity() {
         if (extras!!.containsKey("email")) {
             val something = i.getStringExtra("email")
             if (something != null) {
-                globalStatus.mapa.put("email",something)
+                globalStatus.mapa.put("email", something)
                 sharedPreference.save("EMAIL", something)
             }
         }
         if (extras!!.containsKey("ID")) {
             val something = i.getStringExtra("ID")
             if (something != null) {
-                globalStatus.mapa.put("ID",something)
+                globalStatus.mapa.put("ID", something)
                 sharedPreference.save("ID", something)
             }
         }

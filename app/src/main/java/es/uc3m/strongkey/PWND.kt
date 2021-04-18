@@ -1,6 +1,5 @@
 package es.uc3m.strongkey
 
-import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

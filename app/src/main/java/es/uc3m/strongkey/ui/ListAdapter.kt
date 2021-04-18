@@ -1,6 +1,5 @@
 package es.uc3m.strongkey.ui
 
-import android.R.attr.key
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
@@ -11,24 +10,19 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.net.toUri
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import es.uc3m.strongkey.GlobalStatus
 import es.uc3m.strongkey.databinding.RecyclerViewItemBinding
 import es.uc3m.strongkey.models.AESFile
-import es.uc3m.strongkey.ui.strongboxes.StrongboxesViewModel
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.io.FileInputStream
 import java.io.InputStreamReader
 import java.io.Reader
 import java.io.UnsupportedEncodingException
 import java.nio.charset.StandardCharsets
-import java.security.InvalidKeyException
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
-import java.security.Security
-import java.util.*
+import java.security.*
 import javax.crypto.*
+import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 
@@ -106,8 +100,8 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
                         .create()
                 dialog.show()
 
-                val position: Int = adapterPosition
-                Toast.makeText(itemView.context, "You clicked on item ${position + 1}", Toast.LENGTH_SHORT).show()
+                //val position: Int = adapterPosition
+                //Toast.makeText(itemView.context, "You clicked on item ${position + 1}", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -124,6 +118,7 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
             globalStatus.mapa.put("RUTAA", rutaa)
             (mContext as Activity).startActivityForResult(intent, 2)
         }
+
         private fun decryptWithAES(key: String, strToDecrypt: String?): String? {
             Security.addProvider(BouncyCastleProvider())
             var keyBytes: ByteArray
@@ -131,12 +126,14 @@ class ListAdapter : RecyclerView.Adapter<ListAdapter.MyViewHolder>() {
             try {
                 keyBytes = key.toByteArray(charset("UTF8"))
                 val skey = SecretKeySpec(keyBytes, "AES")
+                val iv = IvParameterSpec(key.substring(0, 16).toByteArray(Charsets.UTF_8))
+
                 val input = org.bouncycastle.util.encoders.Base64
                         .decode(strToDecrypt?.trim { it <= ' ' }?.toByteArray(charset("UTF8")))
 
                 synchronized(Cipher::class.java) {
-                    val cipher = Cipher.getInstance("AES/ECB/PKCS7Padding")
-                    cipher.init(Cipher.DECRYPT_MODE, skey)
+                    val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+                    cipher.init(Cipher.DECRYPT_MODE, skey, iv)
 
                     val plainText = ByteArray(cipher.getOutputSize(input.size))
                     var ptLength = cipher.update(input, 0, input.size, plainText, 0)

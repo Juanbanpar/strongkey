@@ -49,7 +49,7 @@ class AuthActivity : AppCompatActivity() {
 
         println(iD)
 
-        if(iD!=null){
+        if(iD!=null && iD != ""){
             identificacion=iD!!
             emilio=eMAIL!!
             when (biometricManager.canAuthenticate()) {
