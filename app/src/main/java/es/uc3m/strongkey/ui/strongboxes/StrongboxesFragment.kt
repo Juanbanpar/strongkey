@@ -143,16 +143,6 @@ class StrongboxesFragment : Fragment() {
             strongboxesViewModel.addFile(fichero)
         }
 
-        if (requestCode === 2) {
-            var path = data?.data!!
-
-            val globalStatus: GlobalStatus = GlobalStatus
-            var final: String= globalStatus.mapa.get(("FICHERO")) as String
-            println("ESTE ES EL FINAL: " + final)
-
-            alterDocument(path, final)
-        }
-
         if (requestCode == 777) {
             val filePath = data?.data!!
             var sharedPreference:SharedPreference= SharedPreference(requireContext())
